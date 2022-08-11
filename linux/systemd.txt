@@ -1,0 +1,47 @@
+systemd is written in 'C' and it is very fast, booting process is ver fast
+/etc/init.d -->old service
+/etc/systemd/system  --> new services
+
+checking systemd is running or not
+------------------------------
+
+cd /run/systemd/system  --> if directory present then init.d is in systemd
+stat /sbin/init   --> it will show systemd if it is there
+stat /proc/1/exe
+cat /proc/1/comm
+ps -p 1
+
+pid 1 --> mother of all process
+process is program instances, in linux process runs in background 
+
+to check the parent and child process
+------------------------------------
+
+pstree
+pstree -ps 885 --> for particular pid
+ps -eo pid,commv --> it will show only pid and commands
+
+systemctl  --> list all units running in system only active
+systemctl --all  --> including inactive dead
+systemctl list-unit-files (--type=service  --state=enabled/disabled/static/masked)  --> only unit files
+
+All systemd(default) unit files are present in --> /usr/lib/systemd/system
+custom systemd files --> /etc/systemd/system
+
+All enabled services have symbolic links
+
+systemctl kill -9 service-name --> kills the service 
+systemd-analyze -blame   ---> shows time taken to start services while booting
+
+
+
+systemctl -t help --> lists units available
+
+to edit custom systemd files:
+---------------------------
+systemctl edit unit.service
+systemctl reload
+
+systemctl show unit.service --> shows all parameters to use
+
+systemctl deamon-reload --> to reload services after change

@@ -1,0 +1,31 @@
+Every user has one primary group and he is part of multiple groups.
+system user represents system processes & services.system services do not have /home directory
+By using users previleges can be assigned
+All users ->/etc/passwd
+All groupd -> /etc/group
+
+#useradd example1 -c developer
+#groupadd examplegrp
+
+to check effective id
+# id -un example1
+
+3 types of ids  --> 1)real id 2)effective user id 3)saved uid
+
+Default values in creating users
+#useradd -D
+
+   vi /etc/login.defs
+#usermod -aG examplegrp example1
+
+Checking password file integrity(/etc/passwd & /etc/shadow)
+#pwck -q , #grpck -q 
+
+To disable user account
+  #usermod --expiredate -1
+
+#userdel example1  --> deletes user but not home directory
+#userdel -r example1  --> deletes user and also home directory
+
+To find the files associated with particular user id
+ # find / uid 1001

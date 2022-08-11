@@ -1,0 +1,10 @@
+Certificate issue while uploading artifacts to nexus:
+======================================================
+->Download certificate from status bar(lock icon ) to local m/c.
+->copy this cert to required server(jenkins) to java path
+   #/opt/cloudhost/java/jre/lib/security/
+   
+-> execute following commands
+  # keytool -import -trustcacerts -file jenkins-prp.cer -alias JENKINS_PRP_CERT -storepass changeit -keystore cacerts // import cert
+  #keytool -printcert -rfc -sslserver jenkins-prpdxp.it.hpe.com // display cert
+  #keytool -delete -alias JENKINS_PRP_CERT -keystore cacerts //delete cert

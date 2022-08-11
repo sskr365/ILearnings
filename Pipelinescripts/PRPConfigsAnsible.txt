@@ -1,0 +1,152 @@
+pipeline {
+  agent any
+    stages {
+	
+	  stage('Get User Input') {
+            steps {
+                echo '*** START GET-USER-INPUT ***'
+
+                script {
+			        
+				
+                    properties([
+                        parameters([
+                            extendedChoice(defaultValue: 'siva-kumar-reddy-sirigireddy/prp-configs-repo', description: 'Enter HPE Git repository, format: ${username}/${repo-name} (e.g. prpdxp/configs)', multiSelectDelimiter: ',', name: 'GITREPO', quoteValue: false, saveJSONParameterToFile: false, type: 'PT_TEXTBOX', visibleItemCount: 5),
+                            [$class: 'CascadeChoiceParameter', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, name: 'GITBRANCH', randomName: 'choice-parameter-4816978971651983', referencedParameters: 'GITREPO', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false,
+                                script: '''
+                                    def gitURL = "git@github.hpe.com:siva-kumar-reddy-sirigireddy/prp-configs-repo.git"
+                                    def command = "git ls-remote -h $gitURL"
+                                    def proc = command.execute()
+                                    proc.waitFor()
+                                    if ( proc.exitValue() != 0 ) {
+                                    println "Error, ${proc.err.text}"
+                                    return
+                                    }
+                                    def branches = proc.in.text.readLines().collect {
+                                        it.replaceAll(/[a-z0-9]*\\trefs\\/heads\\//, \'\')
+                                    }
+                                    return branches
+                                '''
+                            ]]],
+				
+                            
+                            extendedChoice(name: 'JOB_NAME', description: '', multiSelectDelimiter: ',', quoteValue: false, saveJSONParameterToFile: false, type: 'PT_HIDDEN', visibleItemCount: 5, defaultBindings: '', defaultGroovyClasspath: '',
+                                defaultGroovyScript: '''
+                                    def build = Thread.currentThread().toString()
+                                    def regexp= ".+?/job/([^/]+)/.*"
+                                    def match = build  =~ regexp
+                                    def jobName = match[0][1]
+                                    return jobName
+                                '''
+                            ),
+                            extendedChoice(name: 'JOB_PROPS', description: '', multiSelectDelimiter: ',', quoteValue: false, saveJSONParameterToFile: false, type: 'PT_HIDDEN', visibleItemCount: 5, defaultBindings: '', defaultGroovyClasspath: '',
+                                defaultGroovyScript: '''
+                                    def curlCmd = ["curl", "-H \'Accept:application/vnd.github.v3.raw\'", "-o", "jenkins-config-deploy.properties", "-H", "Authorization:token c69d166d536a56ce05bea08aff3be9adfc21c8d5", "https://raw.github.hpe.com/prpdxp/prp-devops/master/jenkins-config-deploy/jenkins-config-deploy.properties"]
+                                    def proc = curlCmd.execute()
+                                    proc.waitFor()
+                                    Properties properties = new Properties()
+                                    File propertiesFile = new File("jenkins-config-deploy.properties")
+                                    def stream = propertiesFile.newDataInputStream()
+                                    properties.load(stream)
+                                    def groovyPropMap = []
+                                    properties.each() { k, v -> groovyPropMap << \'"\' + k + \'":"\' + v + \'"\'}
+                                    return groovyPropMap.toString()
+                                '''
+                            ),
+                            [$class: 'CascadeChoiceParameter', name: 'APPLICATION', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, randomName: 'choice-parameter-50125699103583', referencedParameters: 'JOB_NAME,JOB_PROPS', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false,
+                                script: '''
+				                   return Arrays.asList(Eval.me(JOB_PROPS).CONFIG_FILE_APP_TYPES.split(",")) 
+                                '''
+                            ]]],
+                            [$class: 'CascadeChoiceParameter', name: 'FILES', choiceType: 'PT_CHECKBOX', description: '', filterLength: 1, filterable: false, randomName: 'choice-parameter-304919683677154', referencedParameters: 'JOB_PROPS,APPLICATION', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false,
+                                script: '''
+                                    return Arrays.asList(Eval.me(JOB_PROPS)["CONFIG_FILES." + APPLICATION].split(",")) 
+                                '''
+                            ]]],
+                            [$class: 'CascadeChoiceParameter', name: 'ENVIRONMENT', choiceType: 'PT_SINGLE_SELECT', description: '', filterLength: 1, filterable: false, randomName: 'choice-parameter-501256991560358', referencedParameters: 'JOB_NAME,JOB_PROPS', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false,
+                                script: '''
+                                        return Arrays.asList(Eval.me(JOB_PROPS).DEPLOY_ENV_LIST.split(","))   
+                                '''
+                            ]]],
+                            [$class: 'CascadeChoiceParameter', name: 'INSTANCES', choiceType: 'PT_CHECKBOX', description: '', filterLength: 1, filterable: false, randomName: 'choice-parameter-3049196836771548', referencedParameters: 'JOB_PROPS,APPLICATION,ENVIRONMENT', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false,
+                                script: '''
+                                    if (Eval.me(JOB_PROPS)["APP_INSTANCES." + APPLICATION + "." + ENVIRONMENT] != "") {
+										def appInstances = Eval.me(JOB_PROPS)["APP_INSTANCES." + APPLICATION + "." + ENVIRONMENT]
+										appInstances = appInstances.replaceAll("~", " ")
+                                        return Arrays.asList(appInstances.split(","))
+                                    }
+                                    
+                                    return ['Selected APPLICATION not associated with any application instances:disabled']
+                                '''
+                            ]]],
+							
+							//extendedChoice(name: 'APPRESTART', description: '', multiSelectDelimiter: ',', quoteValue: false, saveJSONParameterToFile: false, type: 'PT_RADIO', defaultValue: 'no', value: 'no,yes', visibleItemCount: 5)
+							
+							 [$class: 'DynamicReferenceParameter', choiceType: 'ET_FORMATTED_HTML', description: '', filterLength: 1, filterable: false, name: 'APPRESTART', randomName: 'choice-parameter-12247087647594428', referencedParameters: 'APPLICATION', script: [$class: 'GroovyScript', fallbackScript: [classpath: [], sandbox: false, script: ''], script: [classpath: [], sandbox: false, 
+							 script: '''
+							 if(APPLICATION.equals('apache') || APPLICATION.equals('elasticsearch'))
+								{
+								//return ['yes','no']
+								return "<div><input name=\\"value\\" type=\\"radio\\" value=\\"YES\\"> YES</div><div><input name=\\"value\\" type=\\"radio\\" value=\\"NO\\" checked> NO</div>"
+								}
+								else {
+								//return [disabled:'For restart of nodes, please use job DXP-NON-PROD/DXP-NODE-RESTART']
+								return "<b>For restart of nodes, please use job DXP-NON-PROD/DXP-NODE-RESTART</b><input type=\\"hidden\\" name=\\"value\\" value=\\"For restart of nodes, please use job DXP-NON-PROD/DXP-NODE-RESTART\\" />"
+								}''']]],
+
+
+                        ])
+                    ])
+                
+                
+                echo '*** END GET-USER-INPUT ***'
+				
+				}
+            }
+        }
+	stage('Prp-properties Cloning') {
+        steps {
+            script{
+          dir("/home/ansiuser/prp_configs/propertyFiles") {
+              
+			git url:'git@github.hpe.com:siva-kumar-reddy-sirigireddy/prp-configs-repo.git', branch: "${params.GITBRANCH}"
+			
+          }
+            }
+		}
+      
+      } 	
+	stage('Ansible Cloning') {
+        steps {
+            script{
+          ws("/home/ansiuser/prp_configs/Ansible_Playbooks") {
+              
+			git 'git@github.hpe.com:siva-kumar-reddy-sirigireddy/prp-configs-playbooks.git'
+			
+            }
+            }
+		}
+      
+      } 
+      stage('Ansible Deploy') {
+        steps {
+              
+		echo '*** START ANSIBLE-DEPLOY ***'
+		script{
+		    
+		dir("/home/ansiuser/prp_configs/Ansible_Playbooks") {
+		def tagName = INSTANCES.substring(0, INSTANCES.indexOf("(")).trim();
+		 def instanceNum = tagName.replaceAll("[^0-9]","")
+		 def  INSTANCES = params.INSTANCES
+     
+     def instanceHostname = INSTANCES.substring(INSTANCES.indexOf("(") +1,INSTANCES.indexOf(")"))
+		 
+		   ansiblePlaybook becomeUser: 'ansiuser', credentialsId: 'jenkins-ansi-play', disableHostKeyChecking: true, vaultCredentialsId: 'ansi-prpconfig', extras: "-e nodes='${instanceHostname}' -e ENV='${ENVIRONMENT}' -e app='${APPLICATION}' -e configfile='${FILES}' -e instance='${tagName}' -e num='${instanceNum}'", installation: 'Ansible2', inventory: 'inventory', playbook: 'playbooks/prpconfigs.yml', tags:'${FILES}, ${APPRESTART}'
+		}
+	  }
+	  
+      }
+      
+      } 
+    }
+}

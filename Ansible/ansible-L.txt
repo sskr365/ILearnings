@@ -1,0 +1,211 @@
+Khandke, Akshata V
+
+
+
+
+python is required for ansible configuration, with out python we can run ansible using raw modules
+epel package should be installed for ansible installation using -yum,,, installa python3 also along with ansible
+using pip also ansible can be installed'
+create new user --> ansiuser and provide sudo access  "visudo, ansiuser ......"
+for ssh connection --> /etc/ssh->> vi sshd_config ( enable passworg auth: yes)--> restart sshd (service restart sshd,,systemctl restart sshd) 
+do usercreation , visuod nad sshd on all servers
+generate ssh keys --> ssh-keygen and copy public keys to destination servers (ssh-copy-id <server-ip>)
+add target nodes in hosts file (/etc/ansible/hosts),, we can copy hosts & cnfg file to different location based on project work and modify cfg file as per modifications
+
+using ansible we can do sever config, n/m config, tools config,,  in ansible work is parallel 
+ansible has hosts, playbooks, default modules, custom modules, plugins(connector plugin)
+ansible is a agentless architecture bcz no agents are installed in client m/c's, it is open source automation tool, 
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Ansible is open osurce automation tool for IT infrastructure setup using playbooks in yaml lang. 
+
+Ansible use cases:  (https://www.ansible.com/overview/how-ansible-works)
+---------------
+Provisioning
+Configuration Management
+App Deployment
+Continuous Delivery
+Security Automation
+Cloud Automation
+Orchestration
+
+Ansible has---------
+1)modules --> current state to desird state
+2)conditions
+3)actual commands
+
+Ansible in windows -> powershell, .net frame work v4 or later
+        in linux -> python 3.5 or later, selinux
+		
+Inventory
+---------
+static  -> .ini,.txt,.yml   default one(/etc/ansible/hosts)
+dynamic  -> 
+
+Hosts in inventory file---------
+---------------------------
+[linuxservers]
+server a
+server b
+192.168.[250:252].[1:100]
+
+[db servers]
+server a
+
+[webservers]
+server b
+
+[india:children]
+dbservers
+webservers
+
+
+to check servers list from hosts
+  # ansible --list-hosts linuxservers/all/india/ungrouped(shows only ungrouped servers)
+  
+to check ansible inventory graph
+	# ansible-inventory --graph
+	
+	
+to check inventory of project based instead of default------
+------
+	#ansible-inventory --graph -i inventory
+	
+assgnmnet
+---------
+
+hostname puprpose location env
+tta			web
+ttb			web
+ttc			web
+
+ansible --->opensource
+proprietry ansible --> licensed
+
+===================================================================================================================================
+file manage & jinja2 templates
+--------------------
+file mosules to manage files on managed/client nodes::
+lineinfile --> for single line 
+blockinfile --> for multiple lines
+copy
+fetch
+file --> create, remove and create symbolic links to files
+
+ex:
+----->
+hosts: all
+tasks:
+ - name: creatre file
+   file:
+    path: /tmp/removeme
+	owner: ansible
+	mode: 0640
+	state: touch
+	setype: public_coontent_rw_t
+
+--> to check module  
+    # ansible-doc file
+
+example:
+--------
+- name:file copy modules
+  hosts: all
+  tasks:
+  - name copy file demo
+    copy:
+	  src: /etc/hosts
+	  dest: /tmp/
+  - name:add some lines to /tmp/hosts
+    blockinfile:
+	  path: /tmp/hosts
+	  block: |
+	    192.168.1.119 host1.example.com
+		192.168.1.120 host2.example.com
+  - name: verify filechecksum
+    stat:
+	  path: /tmp/hosts
+	  checksum_algorithm: md5
+	register: result
+  - debug:
+      msg: "the checksum of /tmp/hosts is {{ result.stat.checksum }}"
+  - name: fetch a file
+    fetch:
+     src: /tmp/hosts
+     dest: /tmp/    -> it will copy to controller node with hostname/tmp/hosts
+	 
+	 
+jinja2 is advanced varaiables , we can customize target files using varaibles and fcats
+
+jinja2 elements-->data, vars, expressions, conditional statements. It uses vars section
+
+Example:
+-------
+- name: configure VSFTPD using a templates
+  hosts: all
+  vars:
+   anonymous_enable: yes
+   local_enable: yes
+   write_enable: yes
+   anon_upload_enable: yes
+  tasks:
+  - name: install vsftpd
+    yum: 
+	 name: vsftpd
+  - name: use template to copy FTP config 
+    template:
+	 src: vsftpd.j2
+	 dest: /etc/vsftpd/vsftpd.conf
+	 
+--> ansible all -a "cat /etc/vsftpd/vsftpd.conf"
+ansible-facts usage:
+  cat template/vsftpd
+  my ip address={{ ansible_facts['default_ipv4']['address'] }} --->ansible facts usage
+  
+controllers:
+-----------
+example:
+- name: update /etc/hosts dynamically
+  hosts: all
+  tasks:
+  - name: update /etc/hosts
+    template:
+	  src: templates/hosts.j2
+	  dest: /etc/hosts
+--------------------------
+templates/hosts.j2
+{% for host in groups['all'] %}
+{{ hostvars[host]['ansible_facts']['default_ipv4']['address'] }} {{ hostvars[host]['ansible_facts']['fqdn'] }} {{ hostvars[host]['ansible_facts']['hostname'] }}
+{% endfor %}
+
+
+--> ansible ansiblenode1 -m command -a "cat /etc/hosts"
+
+=========================================================================================================================================
+=========================================================================================================================================
+
+ansible-vault
+--------------
+
+.vault_key --> store password  & change permissions to 600
+
+info.txt   -> contains sensitive info
+
+#which ansible-vault ( to check ansible vault)
+
+#ansible-vault encrypt info.txt   --> for encrypting sensitivie info
+
+#ansible-vault decrypt --vault-password-file ~/.vault_key info.txt
+#ansible-vault encrypt --vault-password-file ~/.vault_key info.txt
+#ansible-vault edit --vault-password-file ~/.vault_key info.txt  --> for editing file
+# ' '' '       view  ''  '' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' ' '
+
+ansible-vault create secret
+
+String encryption:
+----------------
+
+ansible-vault encrypt_string 'Test123!' --name 'ansible_password'
+
+	

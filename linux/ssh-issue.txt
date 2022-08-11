@@ -1,0 +1,39 @@
+p1)ssh-copy-id username@server or ssh username@serversname
+    showing as--> permission denied, please tryagin
+s1)- add user in remote hosts to wheel and remote groups
+        #sudo usermod -a -G groupname username
+        #sudo usermod -a -G group1,group2 username
+   - to remove user from group
+	#sudo gpasswd -d username groupname
+   - to delete group
+	#sudo groupdel groupname
+   - to create group
+	#sudo groupadd groupname
+
+   - Troubleshooting steps:
+	Navigate to /etc/ssh/sshd_config
+	Make sure PasswordAuthentication and  PubkeyAuthentication ends with yes
+	Make sure ChallengeResponseAuthentication and PermitRootLogin ends with no.
+	Restart sshd_config
+
+
+====================================
+
+ssh-copy-id i2l00284g.dc02.its.hpecorp.net
+
+
+ansiuser
+
+id ansiuser
+useradd ansiuser
+passwd ansiuser
+usermod -a -G wheel ansiuser
+usermod -a -G remote ansiuser
+
+to make password never expire:
+
+ chage -m 0 -M 99999 -I -1 -E -1 ansiuser
+
+to check details about user
+  chage --list ansiuser
+   
