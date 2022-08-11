@@ -1,7 +1,3 @@
-Khandke, Akshata V
-
-
-
 
 python is required for ansible configuration, with out python we can run ansible using raw modules
 epel package should be installed for ansible installation using -yum,,, installa python3 also along with ansible
