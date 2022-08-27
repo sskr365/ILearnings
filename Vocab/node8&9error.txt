@@ -1,0 +1,11 @@
+ prp-dxp.it.hpe.com: Name or service not known
+
+
+26-Aug-2022 17:25:18.826 WARNING [main] org.apache.naming.NamingContext.lookup Unexpected exception resolving reference
+ com.microsoft.sqlserver.jdbc.SQLServerException: The TCP/IP connection to the host sqldb0001prd.s10.its.hpecorp.net, port 1190 has failed. Error: "null. Verify the connection properties, check that an instance of SQL Server is running on the host and accepting TCP/IP connections at the port, and that no firewall is blocking TCP connections to the port.".
+
+2022-08-26 17:33:01,929 ERROR [fileinstall-/opt/cloudhost/liferay-tomcat/liferay_instance1/osgi/modules][com_hpe_prp_common_api:97] [com.hpe.prp.common.api.config.manager.EmdmhFileImportConfigurationManager(787)] The activate method has thrown an exception
+java.lang.RuntimeException: Unable to create snapshot class for interface com.hpe.prp.common.api.config.EmdmhFileImportConfiguration
+
+ nmcli device status
+Error: NetworkManager is not running.

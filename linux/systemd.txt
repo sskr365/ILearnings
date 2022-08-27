@@ -44,4 +44,8 @@ systemctl reload
 
 systemctl show unit.service --> shows all parameters to use
 
-systemctl deamon-reload --> to reload services after change
+ systemctl daemon-reload --> to reload services after change
+
+##########################################################################################3
+#################################################################################################
+

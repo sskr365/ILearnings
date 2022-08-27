@@ -19,7 +19,7 @@ s1)- add user in remote hosts to wheel and remote groups
 
 ====================================
 
-ssh-copy-id i2l00284g.dc02.its.hpecorp.net
+ssh-copy-id s1l00111g.dc01.its.hpecorp.net
 
 
 ansiuser
@@ -33,6 +33,10 @@ usermod -a -G remote ansiuser
 to make password never expire:
 
  chage -m 0 -M 99999 -I -1 -E -1 ansiuser
+
+visudo
+
+ansiuser ALL=(ALL) NOPASSWD: ALL
 
 to check details about user
   chage --list ansiuser

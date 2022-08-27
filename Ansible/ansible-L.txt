@@ -202,6 +202,10 @@ ansible-vault create secret
 String encryption:
 ----------------
 
-ansible-vault encrypt_string 'Test123!' --name 'ansible_password'
+ansible-vault encrypt_string 'N3w_P4ssw0rd_2019' --name 'OSVProdUser'
+
+/home/ansiuser/{{ instance }}
+
+
 
 	

@@ -29,3 +29,7 @@ To disable user account
 
 To find the files associated with particular user id
  # find / uid 1001
+
+-----------
+
+usermod -aG liferaygrp liferay
