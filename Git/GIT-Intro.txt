@@ -1,0 +1,48 @@
+GIT
+----
+•	Git has its own file structure. For every file in git has unique hash value
+•	Git internally mainly works on hash mapping key value pair
+•	Git is local and no internet is required. It has full access to modify files locally.
+•	Git-hub is repository hosting service and mainly used for distributed teams working on same project, website can be hosted using github and also it has desktop github.
+•	After initializing git , .git folder will be created  -> # git init
+
+Inside .git folder, we have following files/folders
+------------------------------------------------------------------
+-rw-rw-r--. 1 ec2-user ec2-user   73 Sep 19 06:04 description
+drwxrwxr-x. 2 ec2-user ec2-user    6 Sep 19 06:04 branches
+drwxrwxr-x. 4 ec2-user ec2-user   31 Sep 19 06:04 refs
+drwxrwxr-x. 2 ec2-user ec2-user   21 Sep 19 06:04 info
+drwxrwxr-x. 2 ec2-user ec2-user 4096 Sep 19 06:04 hooks
+-rw-rw-r--. 1 ec2-user ec2-user   23 Sep 19 06:04 HEAD
+drwxrwxr-x. 4 ec2-user ec2-user   30 Sep 19 06:04 objects
+-rw-rw-r--. 1 ec2-user ec2-user   92 Sep 19 06:04 config
+
+
+Git object types
+Blob  -> file
+Tree -> folder
+Commit
+Annotated tag
+
+Git lowlevel commands
+#git hash-object
+#git cat-file
+#git mktree
+
+Converting message to git hash values and also generating hash file
+#echo “hello world” |git hash-object  --stdin  --> creates hash value
+#echo “hello world” |git hash-object  --stdin -w --> created hash value and also folder with first 2 letters of hash value which contains file with remaining hash values.
+Hash-value -> folder name + file name  == hash of the file
+
+Hash value can be created from variable(content of file) but reverse is not possible. Mainly it is used for security.
+Hash values in market -->  Md5-128 bit, sha1(github)-hexadecimal format, sha256, sha384, sha512.
+
+To read hash value created 
+  # git cat-file -p a4a25fd26b0e72b84f42e4a84ca5bc06720dbc49
+                 -s --> size
+				 -t --> type
+
+we can also create hash-value through files also
+  # git hash-object file1.txt -w [ it will create folder and also eben if we delete file1.txt the hash value will be there bcz git has its own file structure ]
+  --> no file names will be stored in blob only content of file will be stored.
+  {{ 30 mnts }}
